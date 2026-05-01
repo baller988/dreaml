@@ -83,6 +83,12 @@
 
   <div class="toast" id="toast"></div>
 
+  <script>
+    setTimeout(function () {
+      var loader = document.getElementById("loader");
+      if (loader) loader.classList.add("hidden");
+    }, 1800);
+  </script>
   <script src="/socket.io/socket.io.js"></script>
   <script src="./admin.js"></script>
 </body>
