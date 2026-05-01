@@ -13,20 +13,79 @@ const io = new Server(server, {
 });
 
 const PORT = process.env.PORT || 3000;
+const PUBLIC_DIR = path.join(__dirname, "public");
+const INDEX_FILE = path.join(PUBLIC_DIR, "index.html");
+const ADMIN_FILE = path.join(PUBLIC_DIR, "admin.html");
 const sessions = new Map();
 const admins = new Set();
 
-app.use(express.static(path.join(__dirname, "public"), {
+app.use(express.static(PUBLIC_DIR, {
   etag: true,
   maxAge: "1h"
 }));
 
+app.get("/config.js", (req, res) => {
+  res.type("application/javascript").send(`window.DREAM_LEAGUE_CONFIG = { backendUrl: ${JSON.stringify(`${req.protocol}://${req.get("host")}`)} };`);
+});
+
+function sendPage(filePath, res) {
+  res.sendFile(filePath, (error) => {
+    if (!error) return;
+    console.error(`Missing frontend file: ${filePath}`);
+    res.status(500).type("html").send(`
+      <!doctype html>
+      <html lang="en">
+        <head>
+          <meta charset="utf-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1">
+          <title>Dream League Live</title>
+          <style>
+            body {
+              margin: 0;
+              min-height: 100vh;
+              display: grid;
+              place-items: center;
+              background: #071015;
+              color: #f4fbff;
+              font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+              padding: 24px;
+            }
+            main {
+              max-width: 680px;
+              border: 1px solid rgba(255,255,255,.14);
+              border-radius: 8px;
+              background: rgba(14,27,34,.82);
+              padding: 24px;
+            }
+            code { color: #35f29d; }
+          </style>
+        </head>
+        <body>
+          <main>
+            <h1>Frontend files were not deployed</h1>
+            <p>The Node backend is running, but Render cannot find <code>public/index.html</code>.</p>
+            <p>Push the full repository, including the <code>public</code> folder, then redeploy. Render Root Directory should be empty, not <code>public</code>.</p>
+          </main>
+        </body>
+      </html>
+    `);
+  });
+}
+
 app.get("/", (req, res) => {
-  res.sendFile(path.join(__dirname, "public", "index.html"));
+  sendPage(INDEX_FILE, res);
 });
 
 app.get("/admin", (req, res) => {
-  res.sendFile(path.join(__dirname, "public", "admin.html"));
+  sendPage(ADMIN_FILE, res);
+});
+
+app.get("/healthz", (req, res) => {
+  res.status(200).json({
+    ok: true,
+    service: "dream-league-live-screen-sharing-platform",
+    activeSessions: sessions.size
+  });
 });
 
 function makeSessionId() {
@@ -189,6 +248,6 @@ io.on("connection", (socket) => {
 });
 
 server.listen(PORT, () => {
-  console.log(`Dream League Live Screen Sharing Platform running at http://localhost:${PORT}`);
-  console.log(`Admin dashboard available at http://localhost:${PORT}/admin`);
+  console.log(`Dream League Live Screen Sharing Platform running on port ${PORT}`);
+  console.log(`Admin dashboard available at /admin`);
 });
