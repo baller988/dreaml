@@ -1,4 +1,4 @@
-const socket = io({ transports: ["websocket", "polling"] });
+const socket = window.io ? io({ transports: ["websocket", "polling"] }) : null;
 
 const $ = (id) => document.getElementById(id);
 const loader = $("loader");
@@ -32,6 +32,7 @@ const rtcConfig = {
 };
 
 function hideLoader() {
+  if (!loader) return;
   setTimeout(() => loader.classList.add("hidden"), 250);
 }
 
@@ -111,6 +112,11 @@ function renderSessions() {
 }
 
 async function watchSession(sessionId) {
+  if (!socket) {
+    showToast("Run the Node.js server for live admin controls. GitHub Pages is static only.");
+    return;
+  }
+
   if (selectedSessionId === sessionId && peer) return;
   closePeer();
   selectedSessionId = sessionId;
@@ -155,7 +161,7 @@ async function watchSession(sessionId) {
   });
 }
 
-socket.on("admin:sessions", (payload) => {
+socket?.on("admin:sessions", (payload) => {
   sessions = payload.sessions || [];
   activeUsers.textContent = payload.totals?.activeUsers ?? sessions.length;
   liveSessions.textContent = payload.totals?.liveSessions ?? sessions.length;
@@ -176,7 +182,7 @@ socket.on("admin:sessions", (payload) => {
   }
 });
 
-socket.on("webrtc:offer", async ({ from, sessionId, description }) => {
+socket?.on("webrtc:offer", async ({ from, sessionId, description }) => {
   if (sessionId !== selectedSessionId || !peer) return;
   try {
     await peer.setRemoteDescription(description);
@@ -192,7 +198,7 @@ socket.on("webrtc:offer", async ({ from, sessionId, description }) => {
   }
 });
 
-socket.on("webrtc:ice-candidate", async ({ candidate }) => {
+socket?.on("webrtc:ice-candidate", async ({ candidate }) => {
   if (!peer || !candidate) return;
   try {
     await peer.addIceCandidate(candidate);
@@ -201,7 +207,7 @@ socket.on("webrtc:ice-candidate", async ({ candidate }) => {
   }
 });
 
-socket.on("viewer:session-ended", ({ reason }) => {
+socket?.on("viewer:session-ended", ({ reason }) => {
   showToast(reason || "Session ended");
   selectedSessionId = null;
   watchingTitle.textContent = "No session selected";
@@ -215,7 +221,7 @@ sessionList.addEventListener("click", (event) => {
 });
 
 refreshBtn.addEventListener("click", () => {
-  socket.emit("admin:join");
+  socket?.emit("admin:join");
   showToast("Dashboard refreshed");
 });
 
@@ -248,5 +254,19 @@ disconnectBtn.addEventListener("click", () => {
   socket.emit("admin:disconnect-user", { sessionId: selectedSessionId });
 });
 
-window.addEventListener("load", hideLoader);
-socket.emit("admin:join");
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", hideLoader, { once: true });
+} else {
+  hideLoader();
+}
+
+window.addEventListener("load", hideLoader, { once: true });
+setTimeout(hideLoader, 1800);
+if (socket) {
+  socket.emit("admin:join");
+} else {
+  activeUsers.textContent = "0";
+  liveSessions.textContent = "0";
+  sessionList.innerHTML = `<div class="session-item"><strong>Node server offline</strong><span class="session-meta">GitHub Pages can show the UI, but live sessions require the Express/Socket.io backend.</span></div>`;
+  setControls(false);
+}

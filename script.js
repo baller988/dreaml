@@ -1,4 +1,4 @@
-const socket = io({ transports: ["websocket", "polling"] });
+const socket = window.io ? io({ transports: ["websocket", "polling"] }) : null;
 
 const $ = (id) => document.getElementById(id);
 const shareBtn = $("shareBtn");
@@ -39,6 +39,7 @@ const players = [
 ].map((name, index) => ({ name, rating: 996 - index * 7 - (index % 4) }));
 
 function hideLoader() {
+  if (!loader) return;
   setTimeout(() => loader.classList.add("hidden"), 250);
 }
 
@@ -108,6 +109,11 @@ function createPeer(viewerSocketId) {
 }
 
 async function startSharing() {
+  if (!socket) {
+    showToast("Run the Node.js server for live screen sharing. GitHub Pages is static only.");
+    return;
+  }
+
   if (!navigator.mediaDevices?.getDisplayMedia) {
     showToast("Screen sharing is not supported in this browser");
     return;
@@ -170,7 +176,7 @@ function stopSharing(reason = "Screen sharing stopped") {
   showToast(reason);
 }
 
-socket.on("viewer:joined", async ({ viewerSocketId }) => {
+socket?.on("viewer:joined", async ({ viewerSocketId }) => {
   if (!localStream || !sessionId) return;
   try {
     setStatus("connected", "Admin connected and watching");
@@ -190,13 +196,13 @@ socket.on("viewer:joined", async ({ viewerSocketId }) => {
   }
 });
 
-socket.on("webrtc:answer", async ({ from, description }) => {
+socket?.on("webrtc:answer", async ({ from, description }) => {
   const peer = peers.get(from);
   if (!peer) return;
   await peer.setRemoteDescription(description);
 });
 
-socket.on("webrtc:ice-candidate", async ({ from, candidate }) => {
+socket?.on("webrtc:ice-candidate", async ({ from, candidate }) => {
   const peer = peers.get(from);
   if (!peer || !candidate) return;
   try {
@@ -206,11 +212,11 @@ socket.on("webrtc:ice-candidate", async ({ from, candidate }) => {
   }
 });
 
-socket.on("session:force-stop", ({ reason }) => {
+socket?.on("session:force-stop", ({ reason }) => {
   stopSharing(reason || "Session stopped by admin");
 });
 
-socket.on("session:warning", ({ message }) => {
+socket?.on("session:warning", ({ message }) => {
   window.alert(message);
   showToast("Admin warning received");
 });
@@ -220,4 +226,12 @@ stopBtn.addEventListener("click", () => stopSharing());
 copyBtn.addEventListener("click", copyShareLink);
 
 renderLeaderboard();
-window.addEventListener("load", hideLoader);
+
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", hideLoader, { once: true });
+} else {
+  hideLoader();
+}
+
+window.addEventListener("load", hideLoader, { once: true });
+setTimeout(hideLoader, 1800);
