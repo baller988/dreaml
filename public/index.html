@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#071015">
+  <title>Dream League Live Screen Sharing Platform</title>
+  <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+  <div class="loader" id="loader">
+    <div class="loader-ball"></div>
+    <p>Preparing live arena</p>
+  </div>
+
+  <main class="app-shell">
+    <section class="hero">
+      <nav class="topbar">
+        <a class="brand" href="./index.html">
+          <span class="brand-mark">DL</span>
+          <span>Dream League Live</span>
+        </a>
+        <a class="nav-link" href="./admin.html">Admin</a>
+      </nav>
+
+      <div class="hero-grid">
+        <div class="hero-copy">
+          <span class="eyebrow">Live gameplay broadcast</span>
+          <h1>Dream League Live Screen Sharing Platform</h1>
+          <p>Share your gameplay with tournament staff in real time using secure browser screen capture and low-latency WebRTC streaming.</p>
+
+          <div class="share-panel glass">
+            <button class="primary-action" id="shareBtn" type="button">
+              <span class="pulse-dot"></span>
+              Share Screen
+            </button>
+            <div class="status-row">
+              <span class="status-badge waiting" id="statusBadge">WAITING</span>
+              <span id="statusText">Tap share to start a live session</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="live-card glass">
+          <div class="video-wrap">
+            <video id="localPreview" autoplay muted playsinline></video>
+            <div class="empty-preview" id="emptyPreview">Your live screen preview appears here</div>
+          </div>
+          <div class="session-tools">
+            <div>
+              <small>Session ID</small>
+              <strong id="sessionId">Not live</strong>
+            </div>
+            <button class="secondary-action" id="copyBtn" type="button" disabled>Copy Link</button>
+            <button class="danger-action" id="stopBtn" type="button" disabled>Stop</button>
+          </div>
+          <input class="link-box" id="shareLink" readonly value="Share link will appear after you go live">
+        </div>
+      </div>
+    </section>
+
+    <section class="leaderboard-section">
+      <div class="section-heading">
+        <span class="eyebrow">Top 50</span>
+        <h2>Dream League Players Leaderboard</h2>
+      </div>
+      <div class="leaderboard glass" id="leaderboard"></div>
+    </section>
+  </main>
+
+  <div class="toast" id="toast"></div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="./script.js"></script>
+</body>
+</html>

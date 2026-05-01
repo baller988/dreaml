@@ -249,5 +249,5 @@ io.on("connection", (socket) => {
 
 server.listen(PORT, () => {
   console.log(`Dream League Live Screen Sharing Platform running on port ${PORT}`);
-  console.log(`Admin dashboard available at /admin`);
+  console.log("Admin dashboard available at /admin");
 });
