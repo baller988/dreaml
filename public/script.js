@@ -39,6 +39,7 @@ const players = [
 ].map((name, index) => ({ name, rating: 996 - index * 7 - (index % 4) }));
 
 function hideLoader() {
+  if (!loader) return;
   setTimeout(() => loader.classList.add("hidden"), 250);
 }
 
@@ -225,4 +226,12 @@ stopBtn.addEventListener("click", () => stopSharing());
 copyBtn.addEventListener("click", copyShareLink);
 
 renderLeaderboard();
-window.addEventListener("load", hideLoader);
+
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", hideLoader, { once: true });
+} else {
+  hideLoader();
+}
+
+window.addEventListener("load", hideLoader, { once: true });
+setTimeout(hideLoader, 1800);

@@ -32,6 +32,7 @@ const rtcConfig = {
 };
 
 function hideLoader() {
+  if (!loader) return;
   setTimeout(() => loader.classList.add("hidden"), 250);
 }
 
@@ -253,7 +254,14 @@ disconnectBtn.addEventListener("click", () => {
   socket.emit("admin:disconnect-user", { sessionId: selectedSessionId });
 });
 
-window.addEventListener("load", hideLoader);
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", hideLoader, { once: true });
+} else {
+  hideLoader();
+}
+
+window.addEventListener("load", hideLoader, { once: true });
+setTimeout(hideLoader, 1800);
 if (socket) {
   socket.emit("admin:join");
 } else {
