@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#071015">
+  <title>Admin Dashboard | Dream League Live</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body class="admin-body">
+  <div class="loader" id="loader">
+    <div class="loader-ball"></div>
+    <p>Opening control room</p>
+  </div>
+
+  <main class="admin-shell">
+    <nav class="topbar admin-topbar">
+      <a class="brand" href="/">
+        <span class="brand-mark">DL</span>
+        <span>Admin Control</span>
+      </a>
+      <a class="nav-link" href="/">Home</a>
+    </nav>
+
+    <section class="dashboard-head">
+      <div>
+        <span class="eyebrow">Real-time control</span>
+        <h1>Live Sessions Dashboard</h1>
+      </div>
+      <div class="metrics">
+        <div class="metric glass">
+          <small>Active Users</small>
+          <strong id="activeUsers">0</strong>
+        </div>
+        <div class="metric glass">
+          <small>Live Sessions</small>
+          <strong id="liveSessions">0</strong>
+        </div>
+      </div>
+    </section>
+
+    <section class="admin-layout">
+      <aside class="sessions-panel glass">
+        <div class="panel-title">
+          <h2>Active Players</h2>
+          <span class="status-badge live" id="syncBadge">LIVE</span>
+        </div>
+        <div class="session-list" id="sessionList"></div>
+      </aside>
+
+      <section class="viewer-panel glass">
+        <div class="viewer-head">
+          <div>
+            <small>Watching</small>
+            <strong id="watchingTitle">No session selected</strong>
+          </div>
+          <span class="status-badge offline" id="viewerStatus">OFFLINE</span>
+        </div>
+        <div class="admin-video-wrap">
+          <video id="remoteVideo" autoplay playsinline></video>
+          <div class="empty-preview" id="adminEmpty">Choose a live player to watch instantly</div>
+        </div>
+        <div class="control-grid">
+          <button class="secondary-action" id="refreshBtn" type="button">Refresh</button>
+          <button class="secondary-action" id="warnBtn" type="button" disabled>Send Warning</button>
+          <button class="danger-action" id="endBtn" type="button" disabled>End Session</button>
+          <button class="danger-action" id="disconnectBtn" type="button" disabled>Disconnect</button>
+        </div>
+      </section>
+    </section>
+  </main>
+
+  <div class="modal-backdrop" id="warningModal">
+    <form class="warning-modal glass" id="warningForm">
+      <h2>Send Popup Warning</h2>
+      <textarea id="warningText" maxlength="180">Admin warning: please keep your Dream League gameplay visible.</textarea>
+      <div class="modal-actions">
+        <button class="secondary-action" id="cancelWarn" type="button">Cancel</button>
+        <button class="primary-small" type="submit">Send</button>
+      </div>
+    </form>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="/admin.js"></script>
+</body>
+</html>
