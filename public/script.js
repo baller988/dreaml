@@ -19,6 +19,10 @@ let localStream = null;
 let sessionId = null;
 let peers = new Map();
 
+function isMobileBrowser() {
+  return /Android|iPhone|iPad|iPod|Mobile|IEMobile|Opera Mini/i.test(navigator.userAgent || "");
+}
+
 const rtcConfig = {
   iceServers: [
     { urls: "stun:stun.l.google.com:19302" },
@@ -116,7 +120,11 @@ async function startSharing() {
   }
 
   if (!navigator.mediaDevices?.getDisplayMedia) {
-    showToast("Screen sharing is not supported in this browser");
+    const message = isMobileBrowser()
+      ? "Mobile browsers cannot share the phone screen from a website. Use desktop Chrome, Edge, or Firefox to broadcast."
+      : "Screen sharing is not supported in this browser. Try desktop Chrome, Edge, or Firefox.";
+    setStatus("offline", "Screen sharing is unavailable on this browser");
+    showToast(message);
     return;
   }
 
