@@ -1,4 +1,5 @@
-const socket = window.io ? io({ transports: ["websocket", "polling"] }) : null;
+const BACKEND_URL = window.DREAM_LEAGUE_CONFIG?.backendUrl || window.location.origin;
+const socket = window.io ? io(BACKEND_URL, { transports: ["websocket", "polling"] }) : null;
 
 const $ = (id) => document.getElementById(id);
 const loader = $("loader");

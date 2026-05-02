@@ -1,4 +1,5 @@
-const socket = window.io ? io({ transports: ["websocket", "polling"] }) : null;
+const BACKEND_URL = window.DREAM_LEAGUE_CONFIG?.backendUrl || window.location.origin;
+const socket = window.io ? io(BACKEND_URL, { transports: ["websocket", "polling"] }) : null;
 
 const $ = (id) => document.getElementById(id);
 const shareBtn = $("shareBtn");
@@ -144,7 +145,7 @@ async function startSharing() {
       }
       sessionId = response.session.id;
       sessionIdEl.textContent = sessionId;
-      shareLink.value = `${location.origin}/admin?session=${encodeURIComponent(sessionId)}`;
+      shareLink.value = `${location.origin}${location.pathname.replace(/index\.html$/, "")}admin.html?session=${encodeURIComponent(sessionId)}`;
       copyBtn.disabled = false;
       stopBtn.disabled = false;
       setStatus("live", "Live and ready for admin viewing");
